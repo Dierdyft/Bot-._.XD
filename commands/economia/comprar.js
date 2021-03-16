@@ -1,6 +1,5 @@
 const Discord = require("discord.js");
 const inventory = require("../../database/models/inventory");
-//const items = require("../../shopItems");
 const shopItems = require("../../database/models/shopItems.js");
 
 module.exports = {
@@ -25,7 +24,6 @@ module.exports = {
 
     let data_a = await shopItems.findOne({Guild: message.guild.id}) 
     
-    //const validItem = !!data_a.Items.find(val => val.nombre === itemToBuy);
     let dato = data_a.Items.find(x => x.nombre.toLowerCase() == itemToBuy);
 
 

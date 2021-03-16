@@ -54,10 +54,10 @@ module.exports = {
         );
         message.author.send(link.url);
       } else {
-        message.channel.send("```py\n" + txt + "\n```");
+        message.channel.send("```js\n" + txt + "\n```");
       }
     } catch (err) {
-      message.channel.send("```\n" + err + "\n```");
+      message.channel.send("```js\n" + err + "\n```");
     }
   }
 };

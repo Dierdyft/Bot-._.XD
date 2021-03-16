@@ -39,33 +39,42 @@ for (const folder of commandFolders) {
   }
 }
 
+for (const file of fs.readdirSync("./eventos/")) {
+  if (file.endsWith(".js")) {
+    let fileName = file.substring(0, file.length - 3);
+    let fileContent = require(`./eventos/${file}`);
+    client.on(fileName, fileContent.bind(null, client));
+    delete require.cache[require.resolve(`./eventos/${file}`)];
+  }
+}
+
 const cooldowns = new Discord.Collection();
 //------------------------------------------//
 
 const canalDB = new db.crearDB("canalesDB");
 const countDB = new db.crearDB("contadorDB");
-//------------------------------------------//
-
-client.on("ready", async () => {
-  console.log("Conectado como " + client.user.tag);
-  await mongoose.connect(
-    "mongodb+srv://Dierdyft:termos2005@primercluster.kfwzd.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
-    { useNewUrlParser: true, useUnifiedTopology: true },
-    () => {
-      console.log("Conectado a mongodb desde glitch");
-    }
-  );
-});
+const prefixDB = new db.crearDB("prefixDB");
 //------------------------------------------//
 
 client.on("message", async message => {
   //------------------------------------------//
 
-  const prefix = "xd";
-  if (!message.content.startsWith(prefix) || message.author.bot) return;
+  if (!prefixDB.tiene(message.guild.id)) {
+    prefixDB.set(message.guild.id, "xd");
+  }
+
+  const prefix = await prefixDB.get(message.guild.id);
+  
+  const escapeRegex = str => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const prefixRegex = new RegExp(`^(<@!?${client.user.id}>|${escapeRegex(prefix)})\\s*`)
+  
+  if(!prefixRegex.test(message.content)) return 
+  
+  const [, matchedPrefix] = message.content.match(prefixRegex)
+  if (!message.content.startsWith(matchedPrefix) || message.author.bot) return;
 
   const args = message.content
-    .slice(prefix.length)
+    .slice(matchedPrefix.length)
     .trim()
     .split(/ +/);
 
@@ -137,58 +146,61 @@ Levels.setURL(
 );
 
 const niveles = require("./database/models/level.js");
+//------------------------------------------//
 
 client.on("message", async msg => {
-  //------------------------------------------//
-
   if (msg.author.bot) return;
 
   let data_LVL = await niveles.findOne({ Guild: msg.guild.id });
   if (!data_LVL) data_LVL = await niveles.create({ Guild: msg.guild.id });
 
   let apagador = data_LVL.toggle;
-  if (apagador) {
-    const randomXp = Math.floor(Math.random() * 9) + 1;
-    const hasLeveledUp = await Levels.appendXp(
-      msg.author.id,
-      msg.guild.id,
-      randomXp
-    );
-    if (hasLeveledUp) {
-      const user = await Levels.fetch(msg.author.id, msg.guild.id);
-      msg.channel.send(
-        data_LVL.message
-          .replace("[user]", msg.author.tag)
-          .replace("[level]", user.level)
-      );
-    }
-  }
+  let channel = data_LVL.channel;
+  if (!data_LVL.channel) channel = msg.channel.id;
 
-  let conteo = await canalDB
-    .obtener(`${msg.guild.id}.conteo`)
-    .catch(e => console.log("Error en conteo"));
-  if (msg.channel.id == conteo) {
-    let number = (await countDB.obtener(msg.guild.id)) || 0;
-    console.log(number);
-
-    if (+msg.content === number) {
-      msg.react("✅");
-      countDB.sumar(msg.guild.id, 1);
-    }
-    if (+msg.content !== number) {
-      msg.react("😭");
-      countDB.set(msg.guild.id, 0);
-
-      const cagaron = new Discord.MessageEmbed()
-        .setAuthor(
-          msg.author.tag,
-          msg.author.displayAvatarURL({ dynamic: true })
-        )
-        .setDescription(
-          "<:risas:804921819341127751> la cargaron, ahora volvemos a empezar desde 0"
-        )
-        .setColor("RED");
-      return msg.channel.send(cagaron);
+  if (!data_LVL.ignore_channel.includes(msg.channel.id)) {
+    if (
+      !msg.member.roles.cache.some(x => data_LVL.ignore_roles.includes(x.id))
+    ) {
+      if (apagador) {
+        const randomXp = Math.floor(
+          Math.random() * (data_LVL.exp_max - data_LVL.exp_min + 1) +
+            data_LVL.exp_min
+        );
+        const hasLeveledUp = await Levels.appendXp(
+          msg.author.id,
+          msg.guild.id,
+          randomXp
+        );
+        if (hasLeveledUp) {
+          const user = await Levels.fetch(msg.author.id, msg.guild.id);
+          client.channels.cache
+            .get(channel)
+            .send(
+              data_LVL.message
+                .replace("[user]", msg.author.tag)
+                .replace("[level]", user.level)
+            );
+          let roll = data_LVL.roles.find(e => e.lvl == parseInt(user.level));
+          if (roll) {
+            await msg.member.roles.add(roll.rol);
+            if (mensaje_role.includes("[level]")) {
+              client.channels.cache
+            .get(channel)
+            .send(data_LVL.mensaje_role)
+                .replace("[user]", msg.author.tag)
+                .replace("[role]", msg.guild.roles.resolve(roll.rol).toString())
+                .replace("[level]", user.level);
+            } else {
+              client.channels.cache
+            .get(channel)
+            .send(data_LVL.role_message)
+                .replace("[user]", msg.author.tag)
+                .replace("[role]", msg.guild.roles.resolve(roll.rol).toString())
+            }
+          }
+        }
+      }
     }
   }
 });
@@ -257,5 +269,5 @@ client.rmvb = (Guild, id, bank) => {
 };
 //------------------------------------------//
 
-client.login("Nzc3NjcyNjYzOTM0MDQyMTMy.X7G2Gw.nyp0T7DMNC-XcpgROpFqQ95ahjw");
+client.login(process.env.token);
 //------------------------------------------//

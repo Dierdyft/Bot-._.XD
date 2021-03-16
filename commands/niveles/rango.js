@@ -15,7 +15,7 @@ module.exports = {
 
     const userXp = await DiscordXp.fetch(user.id, message.guild.id);
 
-     const sinXP = new Discord.MessageEmbed()
+    const sinXP = new Discord.MessageEmbed()
       .setAuthor(
         message.author.tag,
         message.author.displayAvatarURL({ dynamic: true })
@@ -34,13 +34,17 @@ module.exports = {
       .setCurrentXP(userXp.xp)
       .setLevel(userXp.level)
       .setRequiredXP(needXp)
-      .setStatus(user.presence.status)
-      .setProgressBar("#F7FE2E", "COLOR")
+      .setCustomStatusColor("#FFFF00")
+      .setProgressBar("#FFFF00", "COLOR")
       .setUsername(user.username)
       .setDiscriminator(user.discriminator)
-    rank.build().then(data => {
-      const img = new Discord.MessageAttachment(data, "rango.png");
-      message.channel.send(img);
-    });
+    /*.setBackground(
+        "IMAGE",
+        "https://cdn.discordapp.com/attachments/798395093161738240/818518920549236736/0-3786_cute-emoji-background-wallpaper-hd-emoji-background.jpg"
+      );
+    */
+    const buffer = await rank.build();
+    const image = canvacord.write(buffer, "rango.png");
+    message.channel.send({ files: [buffer] });
   }
 };

@@ -20,7 +20,7 @@ module.exports = {
       size: 128
     });
 
-    const canvas = Canvas.createCanvas(468, 415);
+    const canvas = Canvas.createCanvas(231, 218);
 
     const ctx = canvas.getContext("2d");
 

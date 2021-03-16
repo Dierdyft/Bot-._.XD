@@ -132,17 +132,15 @@ module.exports = {
       progreso
     );
 
-    let role = message.mentions.roles.first();
-
     let rol;
-    while (rol !== role) {
+    while (!rol || !rol.mentions.roles.first()) {
       rol = (await message.channel.awaitMessages(filter, options)).first()
-        .content;
-      if (rol.toLowerCase() == "cancelar")
+     
+      if (rol.content == "cancelar")
         return message.channel.send(
           "<:risan:817538141585276989> Se ha cancelado el proceso"
         );
-      if (rol !== role) {
+      if (!rol.mentions.roles.first()) {
         message.channel
           .send(
             "<a:baneo:809847807448055818> El role proporcionado es inválido"

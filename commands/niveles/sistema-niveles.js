@@ -2,10 +2,10 @@ const Discord = require("discord.js");
 const level = require("../../database/models/level.js");
 
 module.exports = {
-  name: "subida",
+  name: "sistema-niveles",
   description: "Para activar o desactivar la subida de niveles",
   cooldown: 5,
-  aliases: ["leveling"],
+  aliases: ["system-leveling", "sn"],
   args: true,
   usage: "<on | off>",
   execute: async (client, message, args, prefix) => {

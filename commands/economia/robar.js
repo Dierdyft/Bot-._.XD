@@ -25,19 +25,26 @@ module.exports = {
     
     const menciona = new Discord.MessageEmbed() 
     .setAuthor(message.author.tag, message.author.displayAvatarURL({dynamic: true})) 
-    .setDescription("<a:nocool:811087996832710676> A quien vas a robar") 
+    .setDescription("<a:nocool:811087996832710676> ¿A quien vas a robar amigo?") 
     .setColor("RED") 
     .setTimestamp() 
     if(!member) return message.channel.send(menciona) 
     
     const qeee = new Discord.MessageEmbed() 
     .setAuthor(message.author.tag, message.author.displayAvatarURL({dynamic: true})) 
-    .setDescription("<a:nocool:811087996832710676> No, quieto") 
+    .setDescription("<a:nocool:811087996832710676> No, calmado man") 
     .setColor("RED") 
     .setTimestamp() 
     if(member.id == client.user.id) return message.channel.send(qeee) 
     
-    let member_bal = await client.bal(message.guild.id, message.author.id) 
+     const quede = new Discord.MessageEmbed() 
+    .setAuthor(message.author.tag, message.author.displayAvatarURL({dynamic: true})) 
+    .setDescription("<a:nocool:811087996832710676> When te robas a ti mismo") 
+    .setColor("RED") 
+    .setTimestamp() 
+    if(member.id == message.author.id) return message.channel.send(quede) 
+    
+    let member_bal = await client.bal(message.guild.id, member.id) 
     
     const no_tiene = new Discord.MessageEmbed() 
     .setAuthor(message.author.tag, message.author.displayAvatarURL({dynamic: true})) 

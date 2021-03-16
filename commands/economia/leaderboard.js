@@ -112,6 +112,8 @@ module.exports = {
         .setColor("BLUE");
       return message.channel.send(tabla);
     }
+    
+    //---------------//
     const collection = new Discord.Collection();
 
     await Promise.all(
